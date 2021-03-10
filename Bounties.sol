@@ -1,3 +1,5 @@
+//SPDX-License-Identifier: MIT
+
 pragma solidity ^0.7.0;
 
 /**
@@ -112,12 +114,12 @@ contract Bounties {
      */
      
     modifier validateDeadline(uint _newDeadline) {
-        require(_newDeadline > block.timestamp);
+        require(_newDeadline > block.timestamp, "Deadline must be set in the future!");
         _;
     }
         
     modifier hasValue() {
-        require(msg.value > 0);
+        require(msg.value > 0, "Bounty value must be greater than 0!");
         _;
     }
     
@@ -126,12 +128,12 @@ contract Bounties {
      */
      
     modifier bountyExists(uint _bountyId) {
-        require(_bountyId < bounties.length);
+        require(_bountyId < bounties.length, "Bounty specified does not exist!");
         _;
     }
 
     modifier isBeforeDeadline(uint _bountyId) {
-        require(bounties[_bountyId].deadline > block.timestamp);
+        require(bounties[_bountyId].deadline > block.timestamp, "Bounty deadline has already expired!");
         _;
     }
 
@@ -147,12 +149,12 @@ contract Bounties {
      */
     
     modifier hasBountyStatus(uint _bountyId, BountyStatus _bountyStatus) {
-        require(bounties[_bountyId].status == _bountyStatus);
+        require(bounties[_bountyId].status == _bountyStatus, "Bounty is not in the appropriate status for transaction");
         _;
     }
     
     modifier isNotIssuer(uint _bountyId, address _fulfillmentSender) {
-        require(bounties[_bountyId].issuer != _fulfillmentSender);
+        require(bounties[_bountyId].issuer != _fulfillmentSender, "Issuer cannot fulfill their own bounties!");
         _;
     }
 
@@ -161,21 +163,21 @@ contract Bounties {
      */
 
     modifier fulfillmentExists(uint _bountyId, uint _fulfillmentId) {
-        require(_fulfillmentId < fulfillments[_bountyId].length);
+        require(_fulfillmentId < fulfillments[_bountyId].length, "Fulfillment specified does not exist!");
         _;
     }
     
     /**
-     * Ensures we can't accpet a fulfillment a second time
+     * Ensures we can't accept a fulfillment a second time
      */
      
     modifier fulfillmentPending(uint _bountyId, uint _fulfillmentId) {
-        require (fulfillments[_bountyId][_fulfillmentId].accepted == false);
+        require (fulfillments[_bountyId][_fulfillmentId].accepted == false, "This fulfillment has already been accepted on the specified bounty!");
         _;
     }
 
     modifier isIssuer(uint _bountyId) {
-        require(bounties[_bountyId].issuer == msg.sender);
+        require(bounties[_bountyId].issuer == msg.sender, "Only the issuer is allowed to perform this action!");
         _;
     }
     
@@ -190,4 +192,6 @@ contract Bounties {
      event AcceptFulfillment(uint bounty_id, address issuer, uint fulfillment_id, address fulfiller, uint amount);
 
      event CancelBounty(uint bounty_id, address issuer, uint amount);
+     
+     event Timestamp(uint timestamp);
 }
